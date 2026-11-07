@@ -8,7 +8,7 @@ r_squared = 2.33;
 sigma_squared = 1;   
 M = 5;              
 p = 200;              
-
+nj_square = 0.2;
 % 统一设置颜色，方便对应
 color_bias = [0.2 0.6 1];   % 蓝色
 color_var  = [1 0.5 0.1];   % 橙色
@@ -43,7 +43,7 @@ Z_bias_3d(mask1) = 0;
 
 % gamma > 1 区域
 mask2 = Gamma_3d > 1;
-Z_bias_3d(mask2) = (A_grid_3d(mask2) - M) .* (1 - 1./Gamma_3d(mask2)).^2+(1 - 1./Gamma_3d(mask2)) * r_squared;
+Z_bias_3d(mask2) = (A_grid_3d(mask2) - M) .* (1 - 1./Gamma_3d(mask2)).^2*nj_square +(1 - 1./Gamma_3d(mask2)) * r_squared;
 Z_var_3d(mask2) = (sigma_squared ./ (Gamma_3d(mask2) - 1)) .* (A_grid_3d(mask2)/p + (p-M)/p);
 
 % 绘制 3D 曲面
@@ -72,7 +72,7 @@ gamma_fixed = 2;
 A_line = linspace(5, 60, 200);
 
 % 由于 gamma = 2 > 1，直接代入大于 1 的公式
-bias_line1 = (A_line - M + 1) .* (1 - 1./gamma_fixed) * r_squared;
+bias_line1 = (A_line - M) .* (1 - 1./gamma_fixed)^2 * nj_square +(1 - 1./gamma_fixed) * r_squared;
 var_line1 = (sigma_squared ./ (gamma_fixed - 1)) .* (A_line/p + (p-M)/p);
 
 plot(A_line, bias_line1, '-', 'Color', color_bias, 'LineWidth', 2, 'DisplayName', 'Out-of-sample bias');
@@ -82,7 +82,7 @@ plot(A_line, var_line1, '-', 'Color', color_var, 'LineWidth', 2, 'DisplayName', 
 xlabel('$\sum_{i=1}^{M}\alpha_i$', 'Interpreter', 'latex', 'FontSize', 14);
 ylabel('Risk', 'FontWeight', 'bold');
 title(['(b) fixed \gamma = ', num2str(gamma_fixed)], 'FontSize', 12);
-ylim([0, 25]);
+ylim([0, 7]);
 legend('Location', 'northwest', 'FontSize', 8);
 
 % ==========================================
@@ -106,7 +106,7 @@ var_line2(idx1) = sigma_squared * gamma_line(idx1) ./ (1 - gamma_line(idx1));
 
 % gamma > 1
 idx2 = gamma_line > 1;
-bias_line2(idx2) = (A_fixed - M + 1) .* (1 - 1./gamma_line(idx2)) * r_squared;
+bias_line2(idx2) = (A_fixed - M) .* (1 - 1./gamma_line(idx2)).^2 *nj_square + (1-1./gamma_line(idx2))* r_squared;
 var_line2(idx2) = (sigma_squared ./ (gamma_line(idx2) - 1)) .* (A_fixed/p + (p-M)/p);
 
 plot(gamma_line, bias_line2, '-', 'Color', color_bias, 'LineWidth', 2, 'DisplayName', 'Out-of-sample bias');
@@ -117,7 +117,7 @@ xline(1, 'k:', 'LineWidth', 1.5, 'HandleVisibility', 'off'); % 渐近线
 xlabel('\gamma', 'FontWeight', 'bold');
 ylabel('Risk', 'FontWeight', 'bold');
 title(['(c) fixed $$\sum_{i=1}^{M}\alpha_i = ', num2str(A_fixed), '$$'], 'Interpreter', 'latex', 'FontSize', 12);
-ylim([0, 25]);
+ylim([0, 7]);
 legend('Location', 'northeast', 'FontSize', 8);
 % 整体框架调整完毕
 hold off;
