@@ -1,11 +1,12 @@
-% 清理环境变量
+% 0. 清理环境变量
 clear; clc; close all;
 
 % 1. 设置参数
 r_squared_values = [1, 2.33, 3.66, 5]; 
 sigma_squared = 1;
 M=5; p=300;
-sum_al=50;
+sum_al=500;
+nj_square=0;
 
 % 2. 定义自变量 gamma 的取值范围，避开奇点 gamma = 1
 gamma1 = linspace(0.1, 0.99, 500);   
@@ -28,7 +29,7 @@ for i = 1:length(r_squared_values)
     y1 = sigma_squared * gamma1 ./ (1 - gamma1);
     
     % 当 gamma > 1 时
-    y2 = (sum_al-M)*(1-1./gamma2).^2*0+(1 - 1./gamma2) * r2 +sigma_squared * 1./(gamma2 - 1)*(sum_al/p+(p-M)/p);
+    y2 = (sum_al-M)*(1-1./gamma2).^2*nj_square+(1 - 1./gamma2) * r2 +sigma_squared * 1./(gamma2 - 1)*(sum_al/p+(p-M)/p);
     
     % 合并数据点，中间用 NaN 隔断
     y = [y1, NaN, y2];
@@ -38,7 +39,7 @@ for i = 1:length(r_squared_values)
     
     % 【修改点】：在循环内画出对应高度和颜色的水平虚线
     % 使用 colors(i) 确保虚线颜色和实线颜色完全一致
-    yline(r2, '--', 'Color', colors(i), 'LineWidth', 1.2, 'HandleVisibility', 'off');
+    yline(r2+(sum_al-M)*nj_square, '--', 'Color', colors(i), 'LineWidth', 1.2, 'HandleVisibility', 'off');
 end
 
 % 4. 图像美化与标注
@@ -46,7 +47,7 @@ xlabel('\gamma', 'FontSize', 12, 'FontWeight', 'bold');
 ylabel('risk', 'FontSize', 12, 'FontWeight', 'bold');
 title('Risk vs \gamma for Different r^2', 'FontSize', 14);
 ylim([-1, 15]); 
-
+%xlim([0, 10]); 
 % 5. 基础公共参考线
 yline(0, 'k--', 'LineWidth', 1, 'HandleVisibility', 'off'); % y=0 的黑色基准线
 xline(1, 'r:', 'LineWidth', 1.5, 'DisplayName', 'Asymptote \gamma=1'); % gamma=1 渐近线
