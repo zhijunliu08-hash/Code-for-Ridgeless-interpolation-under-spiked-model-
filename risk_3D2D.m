@@ -8,7 +8,7 @@ r_squared = 2.33;
 sigma_squared = 1;   
 M = 5;  % 常数 M
 p = 200;  % 常数 p
-
+nj_square = 0.2; 
 % 定义网格范围
 gamma1 = linspace(0.1, 0.99, 500);   
 gamma2 = linspace(1.01, 10, 500);    
@@ -40,7 +40,7 @@ Z = NaN(size(Gamma));
 mask1 = Gamma < 1;
 Z(mask1) = sigma_squared * Gamma(mask1) ./ (1 - Gamma(mask1));
 mask2 = Gamma > 1;
-term1 = (A_grid(mask2) - M) .*(1-1./Gamma(mask2)).^2 + (1 - 1./Gamma(mask2)) * r_squared;%偏差项
+term1 = (A_grid(mask2) - M) .*(1-1./Gamma(mask2)).^2 *nj_square + (1 - 1./Gamma(mask2)) * r_squared;%偏差项
 term2 = (sigma_squared ./ (Gamma(mask2) - 1)) .* (A_grid(mask2)/p + (p-M)/p);%方差项
 Z(mask2) = term1 + term2;
 
@@ -70,15 +70,15 @@ ax2 = nexttile(2);
 gamma_fixed = 2; 
 
 % 因为 gamma_fixed = 2 > 1，代入第二段公式计算关于 A_vec 的 2D 曲线
-Z_slice1 = (A_vec - M + 1) * (1 - 1/gamma_fixed) * r_squared + ...
-           (sigma_squared / (gamma_fixed - 1)) * (A_vec/p + (p-M)/p);
+Z_slice1 = (A_vec - M).* (1 - 1/gamma_fixed)^2 * nj_square + (1-1/gamma_fixed) * r_squared + ...
+           (sigma_squared / (gamma_fixed - 1)).* (A_vec/p + (p-M)/p);
 
 plot(A_vec, Z_slice1, 'b-', 'LineWidth', 1.5);
 grid on;
 xlabel('$\sum_{i=1}^{M}\alpha_i$', 'Interpreter', 'latex', 'FontSize', 11);
 ylabel('Risk', 'FontSize', 11);
 title(['(b) fixed $\gamma = ', num2str(gamma_fixed), '$ (e.g. $n=100$)'], 'Interpreter', 'latex', 'FontSize', 12);
-ylim([0, 30]); % 根据需要调整 y 轴范围
+ylim([0, 8]); % 根据需要调整 y 轴范围
 
 
 % =======================================================
@@ -94,7 +94,7 @@ m1 = gamma_vec < 1;
 Z_slice2(m1) = sigma_squared * gamma_vec(m1) ./ (1 - gamma_vec(m1));
 
 m2 = gamma_vec > 1;
-Z_slice2(m2) = (A_fixed - M + 1) .* (1 - 1./gamma_vec(m2)) * r_squared + ...
+Z_slice2(m2) = (A_fixed - M).* (1 - 1./gamma_vec(m2)).^2.* nj_square +(1-1./gamma_vec(m2)).* r_squared + ...
                (sigma_squared ./ (gamma_vec(m2) - 1)) .* (A_fixed/p + (p-M)/p);
 
 plot(gamma_vec, Z_slice2, 'b-', 'LineWidth', 1.5);
@@ -107,4 +107,4 @@ grid on;
 xlabel('$\gamma$', 'Interpreter', 'latex', 'FontSize', 11);
 ylabel('Risk', 'FontSize', 11);
 title(['(c) fixed $\sum\alpha_i = ', num2str(A_fixed), '$'], 'Interpreter', 'latex', 'FontSize', 12);
-ylim([0, 30]); % 根据需要调整 y 轴范围
+ylim([0, 8]); % 根据需要调整 y 轴范围
